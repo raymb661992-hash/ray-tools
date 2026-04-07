@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Ray MB66 - Magic Tools</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: radial-gradient(circle at center, #1e293b, #0f172a); 
+            color: #f8fafc; padding: 20px; margin: 0; min-height: 100vh; 
+            cursor: none; /* Ẩn con trỏ mặc định */
+        }
+        .container { max-width: 1100px; margin: auto; position: relative; z-index: 10; }
+        h2 { text-align: center; color: #60a5fa; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 30px; text-shadow: 0 0 10px rgba(96, 165, 250, 0.5); }
+        
+        /* Tab System */
+        .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+        .tab-btn { padding: 12px 25px; cursor: pointer; background: #1e293b; border: 1px solid #334155; color: #94a3b8; border-radius: 10px; font-weight: bold; transition: 0.3s; }
+        .tab-btn.active { background: #3b82f6; color: white; border-color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+        
+        .content { display: none; animation: fadeIn 0.3s; }
+        .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* UI Elements */
+        .card { background: rgba(30, 41, 59, 0.8); padding: 20px; border-radius: 15px; border: 1px solid #334155; backdrop-filter: blur(5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .flex-box { display: flex; gap: 20px; margin-bottom: 20px; }
+        .input-group { flex: 1; }
+        label { color: #94a3b8; font-size: 13px; font-weight: bold; margin-bottom: 8px; display: block; text-transform: uppercase; }
+        
+        textarea { 
+            width: 100%; height: 250px; background: #0f172a; border: 1px solid #475569; 
+            color: #60a5fa; border-radius: 10px; padding: 15px; box-sizing: border-box; 
+            outline: none; font-family: 'Courier New', monospace; font-size: 14px; transition: 0.3s;
+            cursor: text; /* Giữ con trỏ văn bản khi hover vào ô nhập */
+        }
+        textarea:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+
+        /* Buttons */
+        .btn-box { text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 15px; }
+        button { 
+            padding: 12px 30px; cursor: pointer; border: none; border-radius: 50px; 
+            font-weight: bold; text-transform: uppercase; transition: 0.3s; font-size: 14px;
+        }
+        .btn-main { background: linear-gradient(45deg, #3b82f6, #2563eb); color: white; }
+        .btn-main:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .btn-del { background: #475569; color: #f8fafc; }
+        .btn-del:hover { background: #ef4444; }
+
+        /* Results */
+        .res-container { display: flex; gap: 20px; margin-top: 20px; }
+        .res-box { 
+            flex: 1; background: rgba(15, 23, 42, 0.9); padding: 15px; border-radius: 10px; 
+            border-left: 5px solid #10b981; min-height: 100px; color: #e2e8f0; 
+            font-family: monospace; white-space: pre-wrap; font-size: 14px;
+        }
+        .footer { text-align: center; margin-top: 50px; color: #475569; font-size: 11px; letter-spacing: 5px; font-weight: bold; position: relative; z-index: 10; }
+
+        /* Magic Particle Styles */
+        .particle {
+            position: fixed;
+            pointer-events: none; /* Không cản trở click chuột */
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 8px #fff, 0 0 15px #3b82f6, 0 0 25px #3b82f6;
+            animation: moveParticle 1s ease-out forwards;
+            opacity: 0;
+            z-index: 9999;
+        }
+
+        @keyframes moveParticle {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>RAY MB66 - MAGIC MULTI TOOLS</h2>
+
+    <div class="tabs">
+        <div class="tab-btn active" onclick="switchTab(event, 'bank-tab')">Trích xuất mã Bank</div>
+        <div class="tab-btn" onclick="switchTab(event, 'compare-tab')">So sánh 2 cột</div>
+    </div>
+
+    <div id="bank-tab" class="content active">
+        <div class="card">
+            <label>Dán nội dung sao kê:</label>
+            <textarea id="inputBank" placeholder="Hệ thống sẽ lấy cả cụm: CK MAT..., CHUYEN..., KHOAN..., TIEN..."></textarea>
+            
+            <div class="btn-box">
+                <button class="btn-main" onclick="processBank()">Trích xuất mã</button>
+                <button class="btn-del" onclick="clearData('inputBank', 'resultBank')">Xóa dữ liệu</button>
+            </div>
+
+            <label style="color: #10b981;">Danh sách mã đã lọc:</label>
+            <div id="resultBank" class="res-box"></div>
+        </div>
+    </div>
+
+    <div id="compare-tab" class="content">
+        <div class="card">
+            <div class="flex-box">
+                <div class="input-group">
+                    <label>Danh sách A:</label>
+                    <textarea id="listA" placeholder="Nhập cột A..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Danh sách B:</label>
+                    <textarea id="listB" placeholder="Nhập cột B..."></textarea>
+                </div>
+            </div>
+
+            <div class="btn-box">
+                <button class="btn-main" onclick="processCompare()">So sánh khác biệt</button>
+                <button class="btn-del" onclick="clearCompare()">Xóa dữ liệu</button>
+            </div>
+
+            <div class="res-container">
+                <div class="input-group">
+                    <label style="color: #60a5fa;">Chỉ có ở A:</label>
+                    <div id="resA" class="res-box"></div>
+                </div>
+                <div class="input-group">
+                    <label style="color: #a78bfa;">Chỉ có ở B:</label>
+                    <div id="resB" class="res-box"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">RAY MB66 MAGIC SYSTEM V3.0</div>
+</div>
+
+<script>
+    // Tab System Logic
+    function switchTab(e, id) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        e.currentTarget.classList.add('active');
+    }
+
+    // Xử lý Bank - Lấy cả cụm mã
+    function processBank() {
+        const input = document.getElementById('inputBank').value;
+        const regex = /(?:CK|CHUYEN|KHOAN|TIEN)\s?[A-Z0-9]+/gi;
+        const matches = input.match(regex);
+        const resultDiv = document.getElementById('resultBank');
+
+        if (matches) {
+            const cleaned = [...new Set(matches.map(m => m.trim().toUpperCase()))];
+            resultDiv.innerText = cleaned.join('\n');
+        } else {
+            resultDiv.innerText = "Không tìm thấy mã phù hợp.";
+        }
+    }
+
+    // Xử lý So sánh
+    function processCompare() {
+        const a = document.getElementById('listA').value.split('\n').map(s => s.trim()).filter(Boolean);
+        const b = document.getElementById('listB').value.split('\n').map(s => s.trim()).filter(Boolean);
+        
+        document.getElementById('resA').innerText = a.filter(x => !b.includes(x)).join('\n');
+        document.getElementById('resB').innerText = b.filter(x => !a.includes(x)).join('\n');
+    }
+
+    // Xóa dữ liệu
+    function clearData(inId, outId) {
+        document.getElementById(inId).value = "";
+        document.getElementById(outId).innerText = "";
+    }
+
+    function clearCompare() {
+        document.getElementById('listA').value = "";
+        document.getElementById('listB').value = "";
+        document.getElementById('resA').innerText = "";
+        document.getElementById('resB').innerText = "";
+    }
+
+    // --- Magic Mouse Trail Effect ---
+    function createParticle(x, y) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        document.body.appendChild(particle);
+
+        // Kích thước ngẫu nhiên cho hạt
+        const size = Math.random() * 8 + 4 + 'px';
+        particle.style.width = size;
+        particle.style.height = size;
+
+        // Vị trí xuất phát
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+
+        // Xóa hạt sau khi animation kết thúc
+        setTimeout(() => {
+            particle.remove();
+        }, 1000); // Khớp với thời gian animation
+    }
+
+    // Lắng nghe sự kiện di chuột
+    let particleTimeout;
+    document.addEventListener('mousemove', function(e) {
+        // Tạo hạt với một chút độ trễ để không quá dày đặc
+        if (!particleTimeout) {
+            particleTimeout = setTimeout(() => {
+                createParticle(e.clientX, e.clientY);
+                particleTimeout = null;
+            }, 30); // Cứ mỗi 30ms lại tạo 1 hạt mới
+        }
+    });
+
+    // Tạo hiệu ứng nổ nhẹ khi click
+    document.addEventListener('click', function(e) {
+        for(let i=0; i<8; i++) {
+            setTimeout(() => {
+                createParticle(e.clientX + (Math.random()-0.5)*20, e.clientY + (Math.random()-0.5)*20);
+            }, i*20);
+        }
+    });
+</script>
+
+</body>
+</html>
