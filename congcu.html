@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>RAY MB66 - LUXURY MAGIC TOOLS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #050810; --panel: rgba(22, 30, 45, 0.95); --primary: #3b82f6; --accent: #6366f1; --green: #10b981; --red: #f43f5e; --text: #f3f4f6; }
+        
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; min-height: 100vh; overflow-x: hidden; cursor: crosshair; }
+
+        /* Tiêu đề Thư Pháp Hoa Mỹ */
+        .header-title { text-align: center; margin-top: 20px; position: relative; z-index: 1001; }
+        .header-title h1 { font-family: 'Great Vibes', cursive; font-size: 60px; background: linear-gradient(to bottom, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; filter: drop-shadow(0 0 10px rgba(59,130,246,0.5)); }
+        .header-subtitle { font-weight: 800; letter-spacing: 5px; color: #4b5563; font-size: 14px; margin-top: -10px; }
+
+        /* Hiệu ứng nền 3D ở hai bên (Ô đỏ) */
+        .bg-3d-left, .bg-3d-right { position: fixed; top: 0; width: 15vw; height: 100vh; z-index: -1; pointer-events: none; opacity: 0.4; }
+        .bg-3d-left { left: 0; background: radial-gradient(circle at 0% 50%, var(--primary), transparent 70%); }
+        .bg-3d-right { right: 0; background: radial-gradient(circle at 100% 50%, var(--accent), transparent 70%); }
+        
+        /* Hiệu ứng vệt sao băng */
+        .cursor-trail { position: fixed; width: 8px; height: 8px; background: white; border-radius: 50%; pointer-events: none; z-index: 9999; filter: blur(2px); box-shadow: 0 0 10px #fff, 0 0 20px var(--primary); transition: transform 0.1s ease-out; opacity: 0; }
+
+        .nav-tabs { display: flex; justify-content: center; gap: 15px; margin: 30px 0; position: relative; z-index: 1002; }
+        .tab-btn { padding: 12px 35px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-weight: 800; background: rgba(38, 47, 63, 0.5); color: #9ca3af; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); border-color: transparent; }
+
+        .main-wrapper { display: flex; justify-content: center; width: 100%; position: relative; z-index: 1000; }
+        .container { width: 70vw; background: var(--panel); padding: 30px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); box-shadow: 0 40px 100px rgba(0,0,0,0.8); }
+
+        /* Các thành phần Input/Textarea */
+        .search-bar { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #2d3748; }
+        .search-bar input { flex: 1; background: transparent; border: none; color: #60a5fa; outline: none; font-weight: bold; font-size: 15px; }
+        
+        textarea { width: 100%; background: #0a0e17; border: 1px solid #2d3748; border-radius: 15px; color: #e2e8f0; padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; outline: none; box-sizing: border-box; }
+        textarea:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(59,130,246,0.2); }
+
+        .action-btns { display: flex; justify-content: center; gap: 20px; margin: 25px 0; }
+        .btn { padding: 15px 50px; border-radius: 50px; border: none; font-weight: 800; cursor: pointer; color: white; text-transform: uppercase; transition: 0.3s; }
+        .btn-run { background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
+        .btn-clear { background: rgba(255,255,255,0.05); color: #94a3b8; }
+        .btn:hover { transform: translateY(-3px) scale(1.02); }
+
+        .result-grid { display: grid; gap: 20px; grid-template-columns: repeat(3, 1fr); }
+        .box { background: #0a0e17; border-radius: 16px; border-top: 5px solid #2d3748; height: 450px; display: flex; flex-direction: column; transition: 0.3s; }
+        .box:hover { transform: translateY(-5px); border-top-color: var(--primary); }
+        .box-h { padding: 15px; font-size: 12px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .box-b { flex: 1; padding: 20px; overflow-y: auto; font-family: 'JetBrains Mono'; font-size: 12px; color: #94a3b8; line-height: 1.8; }
+        
+        .copy-btn { padding: 4px 12px; border-radius: 6px; border: 1px solid var(--primary); color: var(--primary); cursor: pointer; font-size: 10px; }
+        .copy-btn:hover { background: var(--primary); color: #fff; }
+        
+        .v-item { display: flex; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        .v-key { color: var(--yellow); font-weight: bold; width: 100px; }
+        .v-code { color: #fff; background: rgba(59, 130, 246, 0.2); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--primary); }
+
+        .hidden { display: none; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-3d-left"></div>
+    <div class="bg-3d-right"></div>
+    <div class="cursor-trail" id="trail"></div>
+
+    <div class="header-title">
+        <h1>Ray MB66</h1>
+        <div class="header-subtitle">MAGIC TOOLS V3.5 PREMIUM</div>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" id="btn1" onclick="switchMode('extract')">TRÍCH XUẤT BANK</button>
+        <button class="tab-btn" id="btn2" onclick="switchMode('compare')">SO SÁNH DỮ LIỆU</button>
+    </div>
+
+    <div class="main-wrapper">
+        <div id="modeExtract" class="container">
+            <div class="search-bar">
+                <input type="text" id="searchInp" placeholder="Dán tìm kiếm nhanh dòng chứa từ khóa..." oninput="filterRawData()">
+                <span id="matchCount" style="color: var(--primary); font-size: 12px; font-weight: 800;"></span>
+            </div>
+            
+            <textarea id="rawText" placeholder="Dán nội dung sao kê vào đây..." style="height: 180px;"></textarea>
+
+            <div class="action-btns">
+                <button class="btn btn-run" onclick="processExtract()">⚡ PHÂN TÍCH NGAY</button>
+                <button class="btn btn-clear" onclick="resetForm('extract')">🧹 LÀM MỚI</button>
+            </div>
+
+            <div class="result-grid">
+                <div class="box" style="border-top-color: var(--green);">
+                    <div class="box-h" style="color: var(--green);">✅ HỢP LỆ <span class="copy-btn" onclick="copyResult('outValid')">COPY</span></div>
+                    <div id="outValid" class="box-b"></div>
+                </div>
+                <div class="box" style="border-top-color: #f59e0b;">
+                    <div class="box-h" style="color: #f59e0b;">⚠️ SAI ĐỊNH DẠNG <span class="copy-btn" onclick="copyResult('outWrong')">COPY</span></div>
+                    <div id="outWrong" class="box-b"></div>
+                </div>
+                <div class="box" style="border-top-color: var(--red);">
+                    <div class="box-h" style="color: var(--red);">❌ KHÔNG TỪ KHÓA <span class="copy-btn" onclick="copyResult('outNone')">COPY</span></div>
+                    <div id="outNone" class="box-b"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hiệu ứng vệt sao băng theo chuột
+        const trail = document.getElementById('trail');
+        document.addEventListener('mousemove', (e) => {
+            trail.style.opacity = '1';
+            trail.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            
+            // Tạo thêm các hạt nhỏ phía sau
+            const spark = document.createElement('div');
+            spark.className = 'cursor-trail';
+            spark.style.left = '0'; spark.style.top = '0';
+            spark.style.opacity = '0.8';
+            spark.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            document.body.appendChild(spark);
+            setTimeout(() => { spark.style.opacity = '0'; spark.remove(); }, 500);
+        });
+
+        let fullContent = "";
+
+        function filterRawData() {
+            const searchVal = document.getElementById('searchInp').value.toLowerCase().trim();
+            const area = document.getElementById('rawText');
+            if (!fullContent) fullContent = area.value;
+            if (!searchVal) { area.value = fullContent; document.getElementById('matchCount').innerText = ""; return; }
+            const filtered = fullContent.split('\n').filter(line => line.toLowerCase().includes(searchVal));
+            area.value = filtered.join('\n');
+            document.getElementById('matchCount').innerText = `Tìm thấy ${filtered.length} dòng`;
+        }
+
+        function processExtract() {
+            const input = document.getElementById('rawText').value;
+            const lines = input.split('\n').filter(l => l.trim() !== "");
+            let v = [], w = [], n = [];
+
+            const rules = [
+                { k: "CHUYEN KHOAN", r: /CHUYEN[\s\.]*KHOAN[\s\.]*([A-Z0-9]{6})/i },
+                { k: "CHUYEN", r: /CHUYEN[\s\.]*([A-Z0-9]{6})/i },
+                { k: "KHOAN", r: /KHOAN[\s\.]*([A-Z0-9]{6})/i },
+                { k: "TIEN", r: /TIEN[\s\.]*([A-Z0-9]{6})/i },
+                { k: "MAT", r: /MAT[\s\.]*([A-Z0-9]{5})/i }
+            ];
+
+            lines.forEach(line => {
+                let found = false;
+                for (let rule of rules) {
+                    if (rule.k === "KHOAN" && /CHUYEN/i.test(line)) continue;
+                    const match = line.match(rule.r);
+                    if (match) {
+                        found = true;
+                        v.push(`<div class="v-item"><span class="v-key">${rule.k}</span><span class="v-code">${match[1].toUpperCase()}</span></div>`);
+                        break;
+                    }
+                }
+                if (!found) {
+                    if (/CHUYEN|KHOAN|TIEN|MAT/i.test(line)) w.push(line);
+                    else n.push(line);
+                }
+            });
+            document.getElementById('outValid').innerHTML = v.join('');
+            document.getElementById('outWrong').innerText = w.join('\n\n');
+            document.getElementById('outNone').innerText = n.join('\n\n');
+        }
+
+        function resetForm(m) {
+            fullContent = "";
+            ['rawText','searchInp','outValid','outWrong','outNone'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el.tagName === 'DIV') el.innerHTML = ""; else el.value = el.innerText = "";
+            });
+            document.getElementById('matchCount').innerText = "";
+        }
+
+        function copyResult(id) {
+            const el = document.getElementById(id);
+            navigator.clipboard.writeText(el.innerText || el.textContent).then(() => alert("Đã copy!"));
+        }
+
+        document.getElementById('rawText').addEventListener('input', function() {
+            if (!document.getElementById('searchInp').value) fullContent = this.value;
+        });
+    </script>
+</body>
+</html>
