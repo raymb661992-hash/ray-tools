@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MB66 ODC SYSTEM - GALAXY BLUE FINAL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #050b18;
+            --bg-card: rgba(15, 23, 42, 0.8);
+            --primary-blue: #38bdf8;
+            --accent-cyan: #22d3ee;
+            --neon-glow: 0 0 20px rgba(56, 189, 248, 0.3);
+            --text-main: #e2e8f0;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --success: #4ade80;
+            --danger: #f87171;
+        }
+
+        body { 
+            margin: 0; background: radial-gradient(circle at top right, #0c1e3a, #050b18);
+            color: var(--text-main); font-family: 'Inter', sans-serif; padding: 20px; min-height: 100vh;
+        }
+
+        h2 { margin: 0 0 25px 0; color: var(--primary-blue); text-align: center; text-transform: uppercase; letter-spacing: 4px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.6); font-weight: 800; }
+        
+        .main-layout { display: grid; grid-template-columns: 650px 1fr; gap: 20px; align-items: flex-start; }
+
+        .excel-widget { background: var(--bg-card); backdrop-filter: blur(12px); padding: 15px; border-radius: 20px; border: 1px solid var(--glass-border); font-size: 11px; box-shadow: var(--neon-glow); }
+        .excel-widget table { width: 100%; border-collapse: separate; border-spacing: 2px; table-layout: fixed; }
+        .excel-widget th, .excel-widget td { padding: 8px 4px; text-align: center; border-radius: 6px; overflow: hidden; }
+        .title-header { background: linear-gradient(90deg, #1e40af, #3b82f6); color: #fff; font-weight: bold; font-size: 13px; letter-spacing: 1px; }
+        .bg-yellow-dark { background: rgba(234, 179, 8, 0.15); color: #fbbf24; border: 1px solid rgba(234, 179, 8, 0.3); font-weight: bold; font-size: 12px; }
+        .bg-blue-glass { background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.1); transition: 0.2s; }
+        .bg-blue-glass:hover { background: rgba(56, 189, 248, 0.12); }
+        .blue-divider { background: var(--primary-blue); width: 4px; box-shadow: 0 0 15px var(--primary-blue); padding: 0 !important; }
+
+        .controls { background: var(--bg-card); padding: 25px; border-radius: 20px; margin-bottom: 25px; display: flex; justify-content: center; gap: 25px; border: 1px solid var(--glass-border); align-items: flex-end; }
+        .file-input-group span { display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary-blue); font-size: 12px; text-transform: uppercase; }
+        input[type="file"] { background: rgba(255,255,255,0.03); color: #94a3b8; padding: 10px; border-radius: 10px; border: 1px dashed #334155; width: 240px; cursor: pointer; }
+        button.btn-run { background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; font-weight: 800; padding: 18px 40px; border-radius: 14px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); transition: 0.3s; text-transform: uppercase; }
+        button.btn-run:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.6); }
+
+        .tab-container { display: flex; gap: 8px; margin-bottom: -1px; position: relative; z-index: 2; }
+        .tab-btn { background: rgba(15, 23, 42, 0.6); color: #64748b; padding: 12px 25px; cursor: pointer; border-radius: 12px 12px 0 0; border: 1px solid var(--glass-border); border-bottom: none; font-weight: 600; transition: 0.3s; }
+        .tab-btn.active { background: var(--bg-card); color: var(--primary-blue); border-top: 3px solid var(--primary-blue); padding-top: 10px; }
+        .tab-content { display: none; background: var(--bg-card); border-radius: 0 20px 20px 20px; padding: 25px; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .card { background: rgba(255, 255, 255, 0.03); padding: 18px; border-radius: 15px; text-align: center; border: 1px solid var(--glass-border); position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--primary-blue); opacity: 0.5; }
+        .card span { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .card h3 { margin: 10px 0 0 0; font-size: 1.4rem; color: #fff; }
+
+        table.main-table { width: 100%; border-collapse: collapse; }
+        table.main-table th { background: rgba(56, 189, 248, 0.08); color: var(--primary-blue); font-size: 11px; padding: 12px; border-bottom: 2px solid var(--glass-border); text-transform: uppercase; }
+        table.main-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; font-size: 13px; }
+
+        .label-red { color: var(--danger); } 
+        .label-green { color: var(--success); } 
+        .label-cyan { color: var(--accent-cyan); } 
+        .label-perc { color: #a78bfa; font-size: 10px; font-weight: bold; }
+        
+        .speed-section { margin-top: 25px; border-top: 1px solid var(--glass-border); padding-top: 20px; }
+        .speed-header { color: #f472b6; font-weight: 800; text-align: center; margin-bottom: 15px; letter-spacing: 2px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<h2>🌌 MB66 ODC SYSTEM - GALAXY BLUE FINAL</h2>
+
+<div class="main-layout">
+    <div class="excel-widget">
+        <table id="systemStatsTable">
+            <colgroup>
+                <col style="width: 24%"><col style="width: 10%"><col style="width: 16%">
+                <col style="width: 4px">
+                <col style="width: 24%"><col style="width: 10%"><col style="width: 16%">
+            </colgroup>
+            <tr><td colspan="7" class="title-header">📊 THỐNG KÊ BIẾN ĐỘNG HỆ THỐNG</td></tr>
+            <tr class="bg-yellow-dark">
+                <td colspan="2">TỔNG NHẬP</td><td id="exTotIn">0</td>
+                <td rowspan="15" class="blue-divider"></td>
+                <td colspan="2">TỔNG XUẤT</td><td id="exTotOut">0</td>
+            </tr>
+            <tr>
+                <td class="label-cyan">MỐC NHẬP</td><td class="label-cyan">ĐƠN</td><td class="label-cyan">VNĐ</td>
+                <td class="label-cyan">MỐC XUẤT</td><td class="label-cyan">ĐƠN</td><td class="label-cyan">VNĐ</td>
+            </tr>
+            <tr class="bg-blue-glass">
+                <td>&lt; 10Tr</td><td id="inC1">0</td><td id="inM1">0</td>
+                <td>&lt; 10Tr</td><td id="outC1">0</td><td id="outM1">0</td>
+            </tr>
+            <tr class="bg-blue-glass">
+                <td>10Tr - 50Tr</td><td id="inC2">0</td><td id="inM2">0</td>
+                <td>10Tr - 50Tr</td><td id="outC2">0</td><td id="outM2">0</td>
+            </tr>
+            <tr class="bg-blue-glass">
+                <td>50Tr - 100Tr</td><td id="inC3">0</td><td id="inM3">0</td>
+                <td>50Tr - 100Tr</td><td id="outC3">0</td><td id="outM3">0</td>
+            </tr>
+            <tr class="bg-blue-glass">
+                <td>&gt; 100Tr</td><td id="inC4">0</td><td id="inM4">0</td>
+                <td>100Tr - 300Tr</td><td id="outC4">0</td><td id="outM4">0</td>
+            </tr>
+            <tr class="bg-blue-glass">
+                <td colspan="3" style="background:transparent"></td>
+                <td>&gt; 300Tr</td><td id="outC5">0</td><td id="outM5">0</td>
+            </tr>
+
+            <tr><td colspan="3" class="title-header">NHÓM CỔNG NHẬP (%)</td><td colspan="3" class="title-header">NHÓM CỔNG XUẤT (%)</td></tr>
+            <tr class="bg-blue-glass">
+                <td style="font-weight: bold; color: #fff;">OKPAY + PPPAY</td><td id="inC_OKPP">0</td><td><span id="exInOKPP">0</span><br><span class="label-perc" id="pInOKPP">0%</span></td>
+                <td style="font-weight: bold; color: #fff;">OKPAY + PPPAY</td><td id="outC_OKPP">0</td><td><span id="exOutOKPP">0</span><br><span class="label-perc" id="pOutOKPP">0%</span></td>
+            </tr>
+            <tr class="bg-blue-glass">
+                <td style="font-size: 9px; font-weight: bold; color: #38bdf8;">ATT + MB66YEE + 196</td><td id="inC_ATT">0</td><td><span id="exInATT">0</span><br><span class="label-perc" id="pInATT">0%</span></td>
+                <td style="font-size: 9px; font-weight: bold; color: #38bdf8;">ATT + MB66YEE + 196</td><td id="outC_ATT">0</td><td><span id="exOutATT">0</span><br><span class="label-perc" id="pOutATT">0%</span></td>
+            </tr>
+            <tr class="bg-blue-glass">
+                <td style="color: #94a3b8;">CÁC CỔNG T3 KHÁC</td><td id="inC_T3">0</td><td><span id="exInT3">0</span><br><span class="label-perc" id="pInT3">0%</span></td>
+                <td style="color: #94a3b8;">CÁC CỔNG T3 KHÁC</td><td id="outC_T3">0</td><td><span id="exOutT3">0</span><br><span class="label-perc" id="pOutT3">0%</span></td>
+            </tr>
+        </table>
+
+        <div class="speed-section">
+            <div class="speed-header">⚡ TỐC ĐỘ XỬ LÝ (AVG)</div>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th style="width:35%; text-align: left;">CỔNG XUẤT</th>
+                        <th style="width:25%">SỐ ĐƠN</th>
+                        <th style="width:40%">TỐC ĐỘ</th>
+                    </tr>
+                </thead>
+                <tbody id="tblSpeedBody">
+                    <tr><td colspan="3" style="color:#64748b">Chờ dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="content-right">
+        <div class="controls">
+            <div class="file-input-group"><span>📥 FILE NHẬP (LỊCH SỬ NẠP)</span><input type="file" id="fileNhap"></div>
+            <div class="file-input-group"><span>📤 FILE XUẤT (LỊCH SỬ RÚT)</span><input type="file" id="fileXuat"></div>
+            <button class="btn-run" onclick="run()">⚡ CHẠY HỆ THỐNG</button>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="openTab(event, 'tabTongQuan')">🔭 TỔNG QUAN</button>
+            <button class="tab-btn" onclick="openTab(event, 'tabCongNap')">💳 CHI TIẾT NẠP</button>
+            <button class="tab-btn" onclick="openTab(event, 'tabCongXuat')">💸 CHI TIẾT XUẤT</button>
+        </div>
+
+        <div id="tabTongQuan" class="tab-content active">
+            <div class="grid">
+                <div class="card"><span>Tổng Nhập</span><h3 id="tNhap">0</h3></div>
+                <div class="card"><span>Phí Đối Tác</span><h3 id="tPhi" class="label-red">0</h3></div>
+                <div class="card"><span>Tổng Xuất</span><h3 id="tXuat">0</h3></div>
+                <div class="card"><span>Lợi Nhuận</span><h3 id="tLoiNhuan" class="label-green">0</h3></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4 class="label-cyan" style="margin-bottom:10px">🥇 TOP NHÂN VIÊN NHẬP (ĐƠN)</h4>
+                    <table id="tblStaffIn" class="main-table"><thead><tr><th>#</th><th>Staff</th><th>Đơn</th><th>Tổng Tiền</th></tr></thead><tbody></tbody></table>
+                </div>
+                <div>
+                    <h4 class="label-cyan" style="margin-bottom:10px">🥈 TOP NHÂN VIÊN XUẤT (ĐƠN)</h4>
+                    <table id="tblStaffOut" class="main-table"><thead><tr><th>#</th><th>Staff</th><th>Đơn</th><th>Tổng Tiền</th></tr></thead><tbody></tbody></table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tabCongNap" class="tab-content">
+            <table id="tblInGate" class="main-table">
+                <thead><tr><th>Cổng Nạp</th><th>Số Đơn</th><th>Tổng Tiền</th><th>Phí</th><th>Thực Nhận</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="tabCongXuat" class="tab-content">
+            <table id="tblOutGate" class="main-table">
+                <thead><tr><th>Cổng Xuất</th><th>Số Đơn</th><th>Tổng Tiền</th><th>Tỷ Lệ (%)</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let dataIn = [], dataOut = [];
+    const fmt = n => Math.floor(n || 0).toLocaleString('de-DE');
+    const pct = (a, b) => b > 0 ? (a/b*100).toFixed(1) + '%' : '0%';
+
+    const LIST_STAFF = [
+        "tthd001", "tthd002", "tthd003", "tthd004", "tthd005", "tthd006", "tthd007", "tthd008", "tthd009", "tthd010", "tthd012",
+        "xnk001", "xnk002", "xnk003", "xnk004", "xnk005", "xnk006", "xnk007", "xnk008", "xnk009", "xnk010", 
+        "xnk011", "xnk012", "xnk013", "xnk014", "xnk015", "xnk016", "xnk017", "xnk018", "xnk019", "xnk020",
+        "xnk021", "xnk022", "xnk023", "xnk024", "xnk025", "xnk026", "xnk027", "xnk028", "xnk029", "xnk030",
+        "xnk031", "xnk032", "xnk033", "xnk034", "xnk035", "xnk036", "xnk037", "xnk038", "xnk039",
+        "xnkol01", "xnkol02", "xnkol03", "xnkol04"
+    ];
+
+    function openTab(evt, tabName) {
+        let content = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < content.length; i++) content[i].style.display = "none";
+        let btns = document.getElementsByClassName("tab-btn");
+        for (let i = 0; i < btns.length; i++) btns[i].className = btns[i].className.replace(" active", "");
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    function parseMoney(v) {
+        if (!v) return 0;
+        let str = v.toString().replace(/,/g, '').trim();
+        return parseFloat(str) || 0;
+    }
+
+    function parseExcelDate(val) {
+        if (!val) return null;
+        if (val instanceof Date) return val;
+        if (typeof val === 'string') {
+            let parts = val.split(/[/\s:]/);
+            if (parts.length >= 3) {
+                return new Date(parts[2], parts[1]-1, parts[0], parts[3]||0, parts[4]||0, parts[5]||0);
+            }
+        }
+        return null;
+    }
+
+    async function readFile(file) {
+        return new Promise(res => {
+            let reader = new FileReader();
+            reader.onload = e => {
+                let data = new Uint8Array(e.target.result);
+                let wb = XLSX.read(data, { type: 'array', cellDates: true });
+                res(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }));
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    async function run() {
+        const btn = document.querySelector('.btn-run');
+        const fNhap = document.getElementById('fileNhap').files[0];
+        const fXuat = document.getElementById('fileXuat').files[0];
+        if (!fNhap && !fXuat) return alert("Vui lòng chọn file!");
+        
+        btn.innerText = "⏳ ĐANG XỬ LÝ...";
+        btn.disabled = true;
+
+        if (fNhap) dataIn = await readFile(fNhap);
+        if (fXuat) dataOut = await readFile(fXuat);
+        
+        setTimeout(() => {
+            calculate();
+            btn.innerText = "⚡ CHẠY HỆ THỐNG";
+            btn.disabled = false;
+        }, 500);
+    }
+
+    function calculate() {
+        let totalInRaw = 0, totalFee = 0, totalOut = 0;
+        let stIn = {}, stOut = {}, gateIn = {}, gateOut = {};
+        let mNhap = [[0,0], [0,0], [0,0], [0,0]]; 
+        let mXuat = [[0,0], [0,0], [0,0], [0,0], [0,0]];
+        let speedMetric = {};
+
+        // 1. XỬ LÝ NHẬP (Cột F * 1000)
+        dataIn.forEach((r, idx) => {
+            if (idx === 0 || !r[5]) return;
+            let money = parseMoney(r[5]) * 1000;
+            totalInRaw += money;
+            
+            let gStr = (r[11] || "NA").toString();
+            let feeMatch = gStr.match(/([\d.,]+)\s*%/);
+            let feeVal = feeMatch ? (money * parseFloat(feeMatch[1].replace(',','.')) / 100) : 0;
+            totalFee += feeVal;
+
+            if(!gateIn[gStr]) gateIn[gStr] = {t:0, c:0, p:0};
+            gateIn[gStr].t += money; gateIn[gStr].c += 1; gateIn[gStr].p += feeVal;
+            
+            let staff = (r[10] || "").toString().toLowerCase().trim();
+            if (LIST_STAFF.includes(staff)) {
+                if(!stIn[staff]) stIn[staff] = {t:0, c:0};
+                stIn[staff].t += money; stIn[staff].c += 1;
+            }
+
+            if (money <= 10000000) { mNhap[0][0]+=money; mNhap[0][1]++; }
+            else if (money <= 50000000) { mNhap[1][0]+=money; mNhap[1][1]++; }
+            else if (money <= 100000000) { mNhap[2][0]+=money; mNhap[2][1]++; }
+            else { mNhap[3][0]+=money; mNhap[3][1]++; }
+        });
+
+        // 2. XỬ LÝ XUẤT (Cột P * 1000)
+        dataOut.forEach((r, idx) => {
+            if (idx === 0 || !r[15]) return; 
+            let money = parseMoney(r[15]) * 1000;
+            totalOut += money;
+            
+            let gX = (r[14] || "NA").toString();
+            if(!gateOut[gX]) gateOut[gX] = {t:0, c:0};
+            gateOut[gX].t += money; gateOut[gX].c += 1;
+
+            let tS = parseExcelDate(r[9]), tE = parseExcelDate(r[19]);
+            if (tS && tE) {
+                let diff = (tE - tS) / 60000;
+                if (diff >= 0 && diff < 300) {
+                    if (!speedMetric[gX]) speedMetric[gX] = [];
+                    speedMetric[gX].push(diff);
+                }
+            }
+
+            let sO = (r[18] || "").toString().toLowerCase().trim();
+            if (LIST_STAFF.includes(sO)) {
+                if(!stOut[sO]) stOut[sO] = {t:0, c:0};
+                stOut[sO].t += money; stOut[sO].c += 1;
+            }
+
+            if (money <= 10000000) { mXuat[0][0]+=money; mXuat[0][1]++; }
+            else if (money <= 50000000) { mXuat[1][0]+=money; mXuat[1][1]++; }
+            else if (money <= 100000000) { mXuat[2][0]+=money; mXuat[2][1]++; }
+            else if (money <= 300000000) { mXuat[3][0]+=money; mXuat[3][1]++; }
+            else { mXuat[4][0]+=money; mXuat[4][1]++; }
+        });
+
+        // 3. UI TỔNG QUAN
+        document.getElementById('tNhap').innerText = fmt(totalInRaw);
+        document.getElementById('tPhi').innerText = fmt(totalFee);
+        document.getElementById('tXuat').innerText = fmt(totalOut);
+        document.getElementById('tLoiNhuan').innerText = fmt(totalInRaw - totalFee - totalOut);
+        document.getElementById('exTotIn').innerText = fmt(totalInRaw);
+        document.getElementById('exTotOut').innerText = fmt(totalOut);
+        
+        mNhap.forEach((v, i) => { document.getElementById(`inM${i+1}`).innerText = fmt(v[0]); document.getElementById(`inC${i+1}`).innerText = fmt(v[1]); });
+        mXuat.forEach((v, i) => { document.getElementById(`outM${i+1}`).innerText = fmt(v[0]); document.getElementById(`outC${i+1}`).innerText = fmt(v[1]); });
+
+        // 4. LOGIC NHÓM CỔNG (FIX LỖI NHẢY NHÓM)
+        let n = { iA:{t:0,c:0}, iO:{t:0,c:0}, iT:{t:0,c:0}, oA:{t:0,c:0}, oO:{t:0,c:0}, oT:{t:0,c:0} };
+        const kOK = ['OKPAY', 'PPPAY', 'GOPAY', '888PAY'];
+        const kMB6 = ['ATT', '196', 'YEE', 'MB66'];
+
+        Object.entries(gateIn).forEach(([k,v]) => {
+            let name = k.toUpperCase();
+            if(kOK.some(s => name.includes(s))) { n.iO.t+=v.t; n.iO.c+=v.c; }
+            else if(kMB6.some(s => name.includes(s))) { n.iA.t+=v.t; n.iA.c+=v.c; }
+            else { n.iT.t+=v.t; n.iT.c+=v.c; }
+        });
+        Object.entries(gateOut).forEach(([k,v]) => {
+            let name = k.toUpperCase();
+            if(kOK.some(s => name.includes(s))) { n.oO.t+=v.t; n.oO.c+=v.c; }
+            else if(kMB6.some(s => name.includes(s))) { n.oA.t+=v.t; n.oA.c+=v.c; }
+            else { n.oT.t+=v.t; n.oT.c+=v.c; }
+        });
+
+        document.getElementById('exInOKPP').innerText = fmt(n.iO.t); document.getElementById('inC_OKPP').innerText = fmt(n.iO.c); document.getElementById('pInOKPP').innerText = pct(n.iO.t, totalInRaw);
+        document.getElementById('exInATT').innerText = fmt(n.iA.t); document.getElementById('inC_ATT').innerText = fmt(n.iA.c); document.getElementById('pInATT').innerText = pct(n.iA.t, totalInRaw);
+        document.getElementById('exInT3').innerText = fmt(n.iT.t); document.getElementById('inC_T3').innerText = fmt(n.iT.c); document.getElementById('pInT3').innerText = pct(n.iT.t, totalInRaw);
+        
+        document.getElementById('exOutOKPP').innerText = fmt(n.oO.t); document.getElementById('outC_OKPP').innerText = fmt(n.oO.c); document.getElementById('pOutOKPP').innerText = pct(n.oO.t, totalOut);
+        document.getElementById('exOutATT').innerText = fmt(n.oA.t); document.getElementById('outC_ATT').innerText = fmt(n.oA.c); document.getElementById('pOutATT').innerText = pct(n.oA.t, totalOut);
+        document.getElementById('exOutT3').innerText = fmt(n.oT.t); document.getElementById('outC_T3').innerText = fmt(n.oT.c); document.getElementById('pOutT3').innerText = pct(n.oT.t, totalOut);
+
+        // 5. RENDER CHI TIẾT
+        renderStaffTable(stIn, 'tblStaffIn'); renderStaffTable(stOut, 'tblStaffOut');
+        
+        let hI = ""; Object.entries(gateIn).sort((a,b)=>b[1].t-a[1].t).forEach(([k,v])=> {
+            hI += `<tr><td style="text-align:left; color:var(--primary-blue)">${k}</td><td>${v.c}</td><td>${fmt(v.t)}</td><td class="label-red">${fmt(v.p)}</td><td class="label-green">${fmt(v.t-v.p)}</td></tr>`;
+        });
+        document.getElementById('tblInGate').querySelector('tbody').innerHTML = hI;
+
+        let hO = ""; Object.entries(gateOut).sort((a,b)=>b[1].t-a[1].t).forEach(([k,v])=> {
+            hO += `<tr><td style="text-align:left; color:var(--accent-cyan)">${k}</td><td>${v.c}</td><td>${fmt(v.t)}</td><td class="label-perc">${pct(v.t, totalOut)}</td></tr>`;
+        });
+        document.getElementById('tblOutGate').querySelector('tbody').innerHTML = hO;
+
+        let hS = ""; Object.entries(speedMetric).forEach(([g, d]) => {
+            let avg = d.reduce((a,b)=>a+b,0)/d.length;
+            hS += `<tr><td style="text-align:left; color:#fff">${g.split(' ')[0]}</td><td>${d.length}</td><td class="${avg>5?'label-red':'label-green'}">${avg.toFixed(1)} m/đ</td></tr>`;
+        });
+        document.getElementById('tblSpeedBody').innerHTML = hS || "<tr><td colspan='3'>-</td></tr>";
+    }
+
+    function renderStaffTable(obj, tid) {
+        let arr = Object.entries(obj).sort((a,b)=>b[1].c-a[1].c).slice(0,10), h = "";
+        arr.forEach(([k,v], i)=> { h += `<tr><td>${i+1}</td><td style="text-align:left;color:var(--primary-blue)">${k}</td><td>${fmt(v.c)}</td><td>${fmt(v.t)}</td></tr>`; });
+        document.getElementById(tid).querySelector('tbody').innerHTML = h || "<tr><td colspan='4'>-</td></tr>";
+    }
+</script>
+</body>
+</html>
